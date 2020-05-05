@@ -9,10 +9,16 @@ use App\Models\Country;
 use App\Models\Genre;
 use App\Models\Image;
 use App\Models\Movie;
-use Illuminate\Support\Str;
+use App\Services\FileService;
 
 class MovieController extends Controller
 {
+    private $fileService;
+
+    public function __construct(FileService $fileService) {
+        $this->fileService = $fileService;
+    }
+
     public function list() {
         $movies = Movie::with(['genres', 'country', 'image'])->get();
         $movies->transform(function ($item, $key) {
@@ -23,7 +29,7 @@ class MovieController extends Controller
                 'id' => $item->id,
                 'title' => $item->title,
                 'genres' => $genres,
-                'poster_path' => $item->image->path,
+                'poster_path' => config('movies.front_prefix_path') . $item->image->path,
                 'description' => $item->description,
                 'country' => $item->country->name
             ];
@@ -32,20 +38,31 @@ class MovieController extends Controller
     }
 
     public function add(MovieRequest $request) {
-        $fileName = Str::random(20) . ' ' . $request->file('image')->getClientOriginalName();
-        $request->file('image')->storeAs('/movies/posters/', $fileName);
-        $image = new Image(['path' => '/movies/posters/' . $fileName]);
+        $path = $this->fileService->storeImage($request->file('image'));
+        $image = new Image(['path' => $path]);
         $image->save();
         $movie = new Movie($request->all());
         $movie->image_id = $image->id;
         $movie->save();
         $genres = json_decode($request->get('genres'));
         $movie->genres()->attach($genres);
-        return response()->json($request->all());
+        return response()->json(['success' => __('Sucess!')]);
     }
 
-    public function update(Movie $movie) {
-
+    public function update(Movie $movie, MovieRequest $request) {
+        if ($request->hasFile('image')) {
+            $image = $movie->image()->first();
+            $this->fileService->removeFile($image->path);
+            $path = $this->fileService->storeImage($request->file('image'));
+            $image->path = $path;
+            $image->save();
+        }
+        if ($request->get('genres')) {
+            $genres = json_decode($request->get('genres'));
+            $movie->genres()->sync($genres);
+        }
+        $movie->update($request->all());
+        return response()->json(['success' => __('Sucess!')]);
     }
 
     public function delete(Movie $movie) {
