@@ -10,6 +10,8 @@ use App\Models\Genre;
 use App\Models\Image;
 use App\Models\Movie;
 use App\Services\FileService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class MovieController extends Controller
 {
@@ -21,19 +23,7 @@ class MovieController extends Controller
 
     public function list() {
         $movies = Movie::with(['genres', 'country', 'image'])->get();
-        $movies->transform(function ($item, $key) {
-            $genres = $item->genres->map( function ($item, $key) {
-                return $item->name;
-            });
-            return [
-                'id' => $item->id,
-                'title' => $item->title,
-                'genres' => $genres,
-                'poster_path' => config('movies.front_prefix_path') . $item->image->path,
-                'description' => $item->description,
-                'country' => $item->country->name
-            ];
-        });
+        $movies = $this->transformMovieList($movies);
         return response()->json($movies);
     }
 
@@ -83,14 +73,37 @@ class MovieController extends Controller
         ]);
     }
 
-//    /**
-//     * Return list of available genres & countries for movie
-//     */
-//    public function search($item) {
-//        $movies = Movie::with(['genres', 'country', 'image'])
-//            ->where('title', 'LIKE', "%{$item}%")
-//            ->orWhere('description', 'LIKE', "%{$item}%")
-//            ->get();
-//        return response()->json($movies);
-//    }
+    /**
+     * Return list of available genres & countries for movie
+     */
+    public function search(Request $request) {
+        $item = $request->get('item');
+        $movies = Movie::with(['genres', 'country', 'image'])
+            ->where('title', 'LIKE', "%{$item}%")
+            ->orWhere('description', 'LIKE', "%{$item}%")
+            ->get();
+        $movies = $this->transformMovieList($movies);
+        return response()->json($movies);
+    }
+
+    /**
+     * @param Collection $movies
+     * @return Collection
+     */
+    private function transformMovieList(Collection $movies) :Collection {
+
+        return $movies->transform(function ($item, $key) {
+            $genres = $item->genres->map( function ($item, $key) {
+                return $item->name;
+            });
+            return [
+                'id' => $item->id,
+                'title' => $item->title,
+                'genres' => $genres,
+                'poster_path' => config('movies.front_prefix_path') . $item->image->path,
+                'description' => $item->description,
+                'country' => $item->country->name
+            ];
+        });
+    }
 }

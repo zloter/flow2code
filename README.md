@@ -52,4 +52,9 @@ and then you need to put additional field _method, to make it work, as shown abo
  - Return data required to add & edit movies (list of countries and genres)
  
 ### GET/movies/search
- - Search through titles and description of movies
+ - Search through titles and description of movies.
+ 
+ Data:
+ ```
+item:Sample
+```
