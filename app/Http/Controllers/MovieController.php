@@ -4,7 +4,8 @@
 namespace App\Http\Controllers;
 
 
-use App\Http\Requests\MovieRequest;
+use App\Http\Requests\AddMovieRequest;
+use App\Http\Requests\UpdateMovieRequest;
 use App\Models\Country;
 use App\Models\Genre;
 use App\Models\Image;
@@ -15,19 +16,33 @@ use Illuminate\Support\Collection;
 
 class MovieController extends Controller
 {
+    /**
+     * @var FileService
+     */
     private $fileService;
 
+    /**
+     * MovieController constructor.
+     * @param FileService $fileService
+     */
     public function __construct(FileService $fileService) {
         $this->fileService = $fileService;
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function list() {
         $movies = Movie::with(['genres', 'country', 'image'])->get();
         $movies = $this->transformMovieList($movies);
         return response()->json($movies);
     }
 
-    public function add(MovieRequest $request) {
+    /**
+     * @param AddMovieRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function add(AddMovieRequest $request) {
         $path = $this->fileService->storeImage($request->file('image'));
         $image = new Image(['path' => $path]);
         $image->save();
@@ -39,7 +54,12 @@ class MovieController extends Controller
         return response()->json(['success' => __('Sucess!')]);
     }
 
-    public function update(Movie $movie, MovieRequest $request) {
+    /**
+     * @param Movie $movie
+     * @param UpdateMovieRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Movie $movie, UpdateMovieRequest $request) {
         if ($request->hasFile('image')) {
             $image = $movie->image()->first();
             $this->fileService->removeFile($image->path);
@@ -55,6 +75,11 @@ class MovieController extends Controller
         return response()->json(['success' => __('Sucess!')]);
     }
 
+    /**
+     * @param Movie $movie
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     */
     public function delete(Movie $movie) {
         $image = $movie->image()->first();
         $this->fileService->removeFile($image->path);
