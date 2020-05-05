@@ -10,9 +10,10 @@ php artisan storage:link
 It's recommended to run 
 ```
 php artisan db:seed
+mkdir -p  storage/app/public/movies/posters/ && cp public/examples/* "$_"
 ```
 
-For testing purpose. Also, it provide sample genre & country category
+For testing purpose. Also, it provide sample genre & country category and covers for tests movies. You cannot delete and edit tests movies if you don't copy this files. 
 
 ## Endpoints
 

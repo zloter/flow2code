@@ -12,8 +12,8 @@ class ImageSeeder extends Seeder
     public function run()
     {
         $images = [
-            ["path" => "/examples/gran_torino.jpeg"],
-            ["path" => "/examples/jeszcze_dalej.jpg"],
+            ["path" => "/movies/posters/gran_torino.jpeg"],
+            ["path" => "/movies/posters/jeszcze_dalej.jpg"],
         ];
         foreach ($images as $image) {
             DB::table('images')->insert($image);

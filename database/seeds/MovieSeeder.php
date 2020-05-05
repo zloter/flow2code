@@ -22,7 +22,7 @@ class MovieSeeder extends Seeder
                 'title' => "Jeszcze dalej niż północ",
                 'description' => "To francuska komedia",
                 'country_id' => 4,
-                "image_id" => 1
+                "image_id" => 2
             ]
         ];
         $relations = [
