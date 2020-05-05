@@ -66,7 +66,11 @@ class MovieController extends Controller
     }
 
     public function delete(Movie $movie) {
-
+        $image = $movie->image()->first();
+        $this->fileService->removeFile($image->path);
+        $movie->delete();
+        $image->delete();
+        return response()->json(['success' => __('Sucess!')]);
     }
 
     /**

@@ -19,5 +19,5 @@ Route::get('/movies/data', 'MovieController@data')->name('movies.data');
 Route::get('/movies/search/{item}', 'MovieController@search')->name('movies.search');
 Route::post('/movies', 'MovieController@add')->name('movies.add');;
 Route::put('/movies/{movie}', 'MovieController@update')->name('movies.update');
-Route::delete('/movies/{movie}', 'MovieController@update')->name('movies.update');
+Route::delete('/movies/{movie}', 'MovieController@delete')->name('movies.delete');
 
